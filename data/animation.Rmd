@@ -1,0 +1,83 @@
+---
+title: "Untitled"
+author: "Kanyan Chen"
+date: "10/02/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE}
+library(shiny)
+library(leaflet)
+library(geojsonio)
+library(lubridate)
+library(RColorBrewer)
+```
+
+```{r load data and preprocess}
+Shooting_data <- read.csv("NYPD_Shooting_modified.csv")
+Shooting_data$Numeric_time = as.numeric(hms(Shooting_data$OCCUR_TIME))/60
+zipcode_map <- geojsonio::geojson_read("nyc-zip-code-tabulation-areas-polygons.geojson",what = "sp")
+zipcode_vector = zipcode_map$postalCode
+Animation_matrix = matrix(rep(0,length(zipcode_vector)*1440),ncol = length(zipcode_vector))
+colnames(Animation_matrix) = zipcode_vector
+for(i in 1:dim(Shooting_data)[1]){
+  time = Shooting_data[i,"Numeric_time"]
+  zip = toString(Shooting_data[i,"Zipcode"])
+  if(time<9){
+    Animation_matrix[(1440+time-8):1440,zip] = Animation_matrix[(1440+time-8):1440,zip]+1
+    Animation_matrix[1:(time+1),zip] = Animation_matrix[1:(time+1),zip]+1
+  }
+  else{
+    Animation_matrix[(time-8):(time+1),zip] = Animation_matrix[(time-8):(time+1),zip]+1
+  }
+}
+```
+
+```{r define color}
+bins <- c(0, 1, 2, 5, 10, 20, 50, 100, Inf)
+pal <- colorBin("YlOrRd", bins = bins)
+```
+
+```{r}
+ui <- bootstrapPage(
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+  leafletOutput("mapAct", width = "100%", height = "100%"),
+  absolutePanel(top = 10, right = 10,
+    sliderInput("animation","Time",
+                min = as.numeric(hms("00:00:00"))/60,
+                max = as.numeric(hms("23:59:00"))/60,
+                value = as.numeric(hms("00:00:00"))/60,
+                animate =
+                  animationOptions(interval = 576, loop = FALSE))
+  )
+)
+```
+
+```{r}
+server <- function(input, output) {
+  filteredData <- reactive({
+    as.vector(Animation_matrix[input$animation+1,])
+  })
+  output$mapAct<-renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      fitBounds(-74.5, 40.3, -73.5, 41.3)
+  })
+  observe({
+    leafletProxy("mapAct") %>%
+      #clearShapes() %>%
+      #if run clearShapes(), there will be flash between two slides;
+      #if not, however, the basemap will be gradually coverd by polygons.
+      addPolygons(data = zipcode_map, stroke = FALSE, smoothFactor = 0.3, fillOpacity = .4,fillColor = pal(filteredData()))
+  })
+}
+```
+
+```{r}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
