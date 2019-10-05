@@ -1,0 +1,96 @@
+---
+title: "Untitled"
+author: "Kanyan Chen"
+date: "10/02/2019"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE}
+library(shiny)
+library(leaflet)
+library(geojsonio)
+library(lubridate)
+library(rmapshaper)
+library(ggplot2)
+```
+
+```{r load data and preprocess}
+Shooting_data <- read.csv("NYPD_Shooting_modified1.csv")
+Shooting_data$Numeric_time = as.numeric(hms(Shooting_data$OCCUR_TIME))/60
+neighborhood_map <- geojsonio::geojson_read("Neighborhood Tabulation Areas.geojson",what = "sp")
+neighborhood_map <- rmapshaper::ms_simplify(neighborhood_map)
+neighborhood_vector = neighborhood_map$ntaname
+Animation_matrix = matrix(rep(0,length(neighborhood_vector)*48),ncol = length(neighborhood_vector))
+colnames(Animation_matrix) = neighborhood_vector
+for(i in 1:dim(Shooting_data)[1]){
+  time = Shooting_data[i,"Numeric_time"]
+  nta = Shooting_data[i,"ntaname"]
+  Animation_matrix[(time%/%30+1),nta] = Animation_matrix[(time%/%30+1),nta]+1
+}
+Animation_array = rowSums(Animation_matrix)
+#Time_index = c("0:00","0:30","1:00","1:30","2:00","2:30","3:00","3:30","4:00","4:30","5:00","5:30",
+#                                    "6:00","6:30","7:00","7:30","8:00","8:30","9:00","9:30","10:00","10:30","11:00","11:30",
+#                                    "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30",
+#                                    "18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30")
+df.line_chart = data.frame(Time = (0:47)/2,Amount = Animation_array)
+```
+
+```{r define color}
+bins <- c(0, 5, 10, 20, 50, 100)
+pal <- colorBin("YlOrRd", bins = bins)
+```
+
+```{r}
+ui <- bootstrapPage(
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+  leafletOutput("mapAct", width = "100%", height = "100%"),
+  absolutePanel(top = 10, right = 10,
+    sliderInput("animation","Time(30 minutes)",
+                min = 0,
+                max = 47,
+                value = 0,
+                step = 1,
+                animate =
+                  animationOptions(interval = 500, loop = FALSE))
+  ),
+  absolutePanel(top = 50, left = 50,plotOutput("line"),width = 300,height = 200)
+)
+```
+
+```{r}
+server <- function(input, output) {
+  filteredData <- reactive({
+    as.vector(Animation_matrix[input$animation+1,])
+  })
+  filteredData1 <- reactive({
+    df.line_chart[1:(input$animation+1),]
+  })
+  output$mapAct<-renderLeaflet({
+    leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
+      addTiles('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png') %>%
+      setView(lng = -73.95, lat = 40.72, zoom = 11)%>%
+      addLegend(pal = pal,values = bins,position = "bottomright")
+  })
+  observe({
+    leafletProxy("mapAct") %>%
+      addPolygons(data = neighborhood_map, stroke = TRUE, weight = 1, color = "purple",fillOpacity = .4,fillColor = pal(filteredData()))
+    output$line <- renderPlot({
+      p = ggplot(filteredData1(),aes(x = Time,y = Amount, group = 1))
+      p + geom_line() + 
+        scale_x_continuous(limits = c(0,24), expand = c(0,0)) + 
+        scale_y_continuous(limits = c(0,1000), expand = c(0,0)) + 
+        xlab("Time(hour)")+ theme_bw()},
+      width = 300, height = 200
+    )
+  })
+}
+```
+
+```{r warning=FALSE}
+shinyApp(ui = ui, server = server)
+```
