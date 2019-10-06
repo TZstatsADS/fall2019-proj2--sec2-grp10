@@ -150,6 +150,7 @@ eventimage = function (start_date, end_date, beginning, ending, label){
   g <- ggplot(data, aes(OCCUR_DATE, count)) +
   geom_label(aes(label = wday(OCCUR_DATE, label = TRUE))) +
   geom_line(color = "cornflowerblue") +
+  xlab("")+
   scale_x_date(date_labels = "%b\n%d",
   date_breaks = "1 day")
   
@@ -169,10 +170,28 @@ eventimage(start_date = "2017-12-20", end_date = "2018-01-03", beginning = "2017
 # start_date & end_date are the ranges of x-axis
 # beginning & ending are the ranges of marker
 # label is the word asscoiated with the marker
+
+# year shooting by boro
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+
+boro_overall <- function(x, boro){
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+   ggplot(year_boro %>% filter(BORO == x), aes(OCCUR_YEAR, count))+
+  geom_point()+
+  geom_line(aes(group= BORO))+
+  ggtitle(paste("Shootings counts by year in", boro))+
+  xlab("")
+}
+
+# example
+boro_overall(x= "BRONX", boro ="BRONX")
+# input x is the boro name
 ```
 
 
-```
+
 
 ```{r}
 # Needed plots
@@ -192,33 +211,20 @@ ggplot(year_data, aes(OCCUR_YEAR, count))+
 year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
    summarize(count = n())
 
-# BRONX 
-ggplot(year_boro %>% filter(BORO == "BRONX"), aes(OCCUR_YEAR, count))+
+boro_overall <- function(x, boro){
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+   ggplot(year_boro %>% filter(BORO == x), aes(OCCUR_YEAR, count))+
   geom_point()+
   geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
+  ggtitle(paste("Shootings counts by year in", boro))+
+  xlab("")
+}
 
-# BROOKLYN
-ggplot(year_boro %>% filter(BORO == "BROOKLYN"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
+# example
+boro_overall(x= "BRONX", boro ="BRONX")
+# input x is the boro name
 
-# MANHATTAN
-ggplot(year_boro %>% filter(BORO == "MANHATTAN"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
-# STATEN ISLAND
-ggplot(year_boro %>% filter(BORO == "STATEN ISLAND"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
-# QUEENS
-ggplot(year_boro %>% filter(BORO == "QUEENS"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
 
 ggplot(year_boro, aes(OCCUR_YEAR, count, color = BORO))+
   geom_point()+
