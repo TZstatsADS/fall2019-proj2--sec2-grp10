@@ -2,9 +2,7 @@
 title: "EDA Time Series Plots"
 author: "Weijia Bao"
 date: "10/03/2019"
-output:
-  pdf_document: default
-  html_document: default
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +19,7 @@ library(plotly)
 ```
 
 ```{r load data and preprocess}
-Shooting_data <- read.csv("NYPD_Shooting_modified1.csv")
+Shooting_data <- read.csv("../data/NYPD_Shooting_modified1.csv")
 Shooting_data$Numeric_time = as.numeric(hms(Shooting_data$OCCUR_TIME))/60
 ```
 
