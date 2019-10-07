@@ -134,6 +134,64 @@ ggplot(year2017, aes(OCCUR_DATE, count))  +
     theme_grey(16)
 ```
 ```{r}
+###################################### Event ######################################### 
+###################################### Event ######################################### 
+###################################### Event ######################################### 
+library(ggplot2)
+library(ggpubr)
+eventimage = function (start_date, end_date, beginning, ending, label){
+  data <- Shooting_data %>%
+    filter(OCCUR_DATE >= as.Date(start_date, format = "%Y-%m-%d")&
+             OCCUR_DATE <= as.Date(end_date, format = "%Y-%m-%d")) %>%
+    group_by(OCCUR_DATE) %>%
+    summarize(count = n())
+  g <- ggplot(data, aes(OCCUR_DATE, count)) +
+  geom_label(aes(label = wday(OCCUR_DATE, label = TRUE))) +
+  geom_line(color = "cornflowerblue") +
+  xlab("")+
+  scale_x_date(date_labels = "%b\n%d",
+  date_breaks = "1 day")
+  
+  start <- as.Date(beginning, format = "%Y-%m-%d")
+  end <- as.Date(ending, format = "%Y-%m-%d")
+  g+annotate("rect", xmin = start, xmax = end,
+             ymin = -Inf, ymax = Inf, fill = "green",
+             alpha = .2) +
+    annotate("text", x = end + 2,
+             y = 7, label = label,
+             color = "green", hjust = 0) +
+    theme_classic()
+}
+
+# example of a single input
+eventimage(start_date = "2017-12-20", end_date = "2018-01-03", beginning = "2017-12-24", ending = "2017-12-27", label = "Dec 24 - Dec 27")
+# start_date & end_date are the ranges of x-axis
+# beginning & ending are the ranges of marker
+# label is the word asscoiated with the marker
+
+# year shooting by boro
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+
+boro_overall <- function(x, boro){
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+   ggplot(year_boro %>% filter(BORO == x), aes(OCCUR_YEAR, count))+
+  geom_point()+
+  geom_line(aes(group= BORO))+
+  ggtitle(paste("Shootings counts by year in", boro))+
+  xlab("")
+}
+
+# example
+boro_overall(x= "BRONX", boro ="BRONX")
+# input x is the boro name
+```
+
+
+
+
+```{r}
 # Needed plots
 ######################################### OVERVIEW ######################################### 
 
@@ -151,33 +209,20 @@ ggplot(year_data, aes(OCCUR_YEAR, count))+
 year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
    summarize(count = n())
 
-# BRONX 
-ggplot(year_boro %>% filter(BORO == "BRONX"), aes(OCCUR_YEAR, count))+
+boro_overall <- function(x, boro){
+year_boro <- Shooting_data %>% group_by(OCCUR_YEAR, BORO) %>%
+   summarize(count = n())
+   ggplot(year_boro %>% filter(BORO == x), aes(OCCUR_YEAR, count))+
   geom_point()+
   geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
+  ggtitle(paste("Shootings counts by year in", boro))+
+  xlab("")
+}
 
-# BROOKLYN
-ggplot(year_boro %>% filter(BORO == "BROOKLYN"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
+# example
+boro_overall(x= "BRONX", boro ="BRONX")
+# input x is the boro name
 
-# MANHATTAN
-ggplot(year_boro %>% filter(BORO == "MANHATTAN"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
-# STATEN ISLAND
-ggplot(year_boro %>% filter(BORO == "STATEN ISLAND"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
-# QUEENS
-ggplot(year_boro %>% filter(BORO == "QUEENS"), aes(OCCUR_YEAR, count, color = BORO))+
-  geom_point()+
-  geom_line(aes(group= BORO))+
-  ggtitle("Shootings counts by boro/year")
 
 ggplot(year_boro, aes(OCCUR_YEAR, count, color = BORO))+
   geom_point()+
@@ -209,9 +254,8 @@ ggplot(overall, aes(OCCUR_YEAR, count))+
   geom_point()+
          geom_line(aes(group = OCCUR_YEAR))+
          facet_grid(.~weekday)+
-  ggtitle("year/weekday")+
+  ggtitle("year/weekday")
+#+
   ylim(35, 53)
-
-
 ```
 
