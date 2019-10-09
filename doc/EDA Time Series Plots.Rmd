@@ -286,6 +286,12 @@ ggplot(year_boro, aes(Year, count, color = BORO))+
   geom_point()+
   geom_line(aes(group= BORO))+
   xlab("")+
+  geom_text(aes(x = "2014", y = 700, label = "BROOKLYN", color = "BROOKLYN")) + 
+  geom_text(aes(x = "2014", y = 500, label = "BRONX", color = "BRONX")) + 
+  geom_text(aes(x = "2014", y = 280, label = "QUEENS", color = "QUEENS")) + 
+  geom_text(aes(x = "2014", y = 190, label = "MANHATTAN", color = "MANHATTAN"))+
+  geom_text(aes(x = "2014", y = 100, label = "STATEN ISLAND", color = "STATEN ISLAND")) + 
+  theme(legend.position="none")+
   ggtitle("Shootings Counts by boro/year")
 
 # year shooting by murder
@@ -297,6 +303,39 @@ ggplot(year_murder, aes(Year, count, color = Murder))+
   geom_line(aes(group= Murder))+
   xlab("")+
   ggtitle("Shootings Counts by murder/year")
+
+# year shooting by Victim sex
+year_sex <- Shooting_data %>% group_by(Year, VIC_SEX) %>%
+   summarize(count = n())
+ggplot(year_sex, aes(Year, count, color = VIC_SEX))+
+  geom_point()+
+  geom_line(aes(group= VIC_SEX))+
+  xlab("")+
+  geom_text(aes(x = "2014", y = 1500, label = "MALE", color = "M"))+
+  geom_text(aes(x = "2014", y = 250, label = "FEMALE", color = "F")) + 
+  geom_text(aes(x = "2014", y = 10, label = "UNKNOWN", color = "U"))+
+  theme(legend.position="none")+
+  ggtitle("Shootings Counts by Victims' sex/year")
+
+# year shooting by VICTIM RACE
+year_race <- Shooting_data %>% group_by(Year, VIC_RACE) %>%
+   summarize(count = n())
+ggplot(year_race, aes(Year, count, color = VIC_RACE))+
+  geom_point()+
+  geom_line(aes(group= VIC_RACE))+
+  xlab("")+
+  ggtitle("Shootings Counts by Victims' race/year")
+
+# year shooting by VICTIM age
+Shooting_data <- rename(Shooting_data, AGE_GROUP = VIC_AGE_GROUP)  
+year_age <- Shooting_data %>% group_by(Year, AGE_GROUP) %>%
+   summarize(count = n())
+ggplot(year_age, aes(Year, count, color = AGE_GROUP))+
+  geom_point()+
+  geom_line(aes(group= AGE_GROUP))+
+  xlab("")+
+  ggtitle("Shootings Counts by Victims' age/year")
+
 ```  
 
 
