@@ -1,0 +1,13 @@
+name: NYCshooting
+title: NYCshooting
+username:
+account: grac4ie
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1293557
+bundleId: 2475411
+url: https://grac4ie.shinyapps.io/NYCshooting/
+when: 1570428401.39394
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Neighborhood Tabulation Areas.geojson|NYPD_Shooting_modified1.csv

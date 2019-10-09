@@ -1,0 +1,42 @@
+---
+title: "Untitled"
+author: "Kanyan Chen"
+date: "10/02/2019"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE}
+library(shiny)
+library(leaflet)
+library(geojsonio)
+library(lubridate)
+library(rmapshaper)
+```
+
+```{r}
+st <- geojsonio::geojson_read("data/Neighborhood Tabulation Areas.geojson", what = "sp")
+
+d <- leaflet(st, options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
+      addTiles('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png') %>%
+      setView(lng = -73.95, lat = 40.72, zoom = 11)
+
+Shooting_data <- read.csv("data/NYPD_Shooting_modified1.csv")
+
+content <- paste("Date:",Shooting_data$OCCUR_DATE,"; ", 
+                 "Time:",Shooting_data$OCCUR_TIME, "<br/>",
+                 "Statistical murder flag:",Shooting_data$STATISTICAL_MURDER_FLAG, "<br/>",
+                 "Precinct:",Shooting_data$PRECINCT,"; ",
+                 "Vic age:",Shooting_data$VIC_AGE_GROUP,"<br/>",
+                 "Vic sex:",Shooting_data$VIC_SEX,"; ",
+                 "Vic race:",Shooting_data$VIC_RACE,"<br/>"
+                 )
+
+d1 <- d %>% addCircleMarkers(lng = ~Shooting_data$Longitude, lat = ~Shooting_data$Latitude, 
+                             popup = content, clusterOptions = markerClusterOptions())
+d1
+```

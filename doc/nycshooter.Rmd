@@ -1,0 +1,134 @@
+---
+title: "R Notebook"
+output: html_notebook
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = TRUE, cache = T, message = FALSE, warning = FALSE)
+options(mc.cores = parallel::detectCores())
+library(leaflet)
+library(geojsonio)
+library(lubridate)
+library(rmapshaper)
+library(ggplot2)
+library(ggthemes)
+library(RColorBrewer)
+library(tidyverse)
+
+library(shiny)
+library(shinydashboard)
+```
+
+```{r}
+Shooting_data <- read.csv("../data/NYPD_Shooting_modified1.csv")
+
+```
+
+```{r}
+# animation
+Shooting_data$Numeric_time = as.numeric(hms(Shooting_data$OCCUR_TIME))/60
+neighborhood_map <- geojsonio::geojson_read("../data/Neighborhood Tabulation Areas.geojson",what = "sp")
+neighborhood_map <- rmapshaper::ms_simplify(neighborhood_map)
+neighborhood_vector = neighborhood_map$ntaname
+Animation_matrix = matrix(rep(0,length(neighborhood_vector)*48),ncol = length(neighborhood_vector))
+colnames(Animation_matrix) = neighborhood_vector
+for(i in 1:dim(Shooting_data)[1]){
+    time = Shooting_data[i,"Numeric_time"]
+    nta = Shooting_data[i,"ntaname"]
+    Animation_matrix[(time%/%30+1),nta] = Animation_matrix[(time%/%30+1),nta]+1
+}
+Animation_array = rowSums(Animation_matrix)
+df.line_chart = data.frame(Time = (0:47)/2,Amount = Animation_array)
+
+bins <- c(0, 5, 10, 20, 50, 100)
+pal <- colorBin("YlOrRd", bins = bins)
+```
+
+
+
+
+
+```{r}
+ui <- dashboardPage(skin = "yellow",
+                    dashboardHeader(title = "Main Title"),
+                    dashboardSidebar(sidebarMenu(
+                        menuItem("Home", tabName = "Home", icon = icon("home")),
+                        menuItem("Overview", tabName = "Overview", icon = icon("archway")),
+                        menuItem("Map", tabName = "Map", icon = icon("flag-checkered")),
+                        menuItem("Insight", tabName = "Insight", icon = icon("industry")),
+                        menuItem("Source", tabName = "Source", icon = icon("th"))
+                    )),
+                    dashboardBody(
+                        tabItems(
+                            tabItem(tabName = "Home",
+                                    fluidPage(
+                                        fluidRow(
+                                            box(width = 15, title = "Introduction", status = "warning",
+                                                solidHeader = TRUE, h3("Main Title"), 
+                                                h4("By Weijia Bao, Kanyan Chen, Tiantian Chu, Chang Xu, Qingyu Zhang"),
+                                                "This interactive project provides ..... about NYC shootings....")),
+                                        fluidRow(
+                                            box(width = 15, title = "Summary", status = "warning", solidHeader = TRUE, 
+                                                h3("Title1"), "BlaBlaxxxx",
+                                                h3("Title2"), "aaasdasdldkfjkl",
+                                                h3("Title3"), "sdafjhoihdoig"))
+                                    )),
+                            tabItem(tabName = "Overview",
+                                    fluidPage(
+                                        #animation
+                                        fluidRow(tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+                                                 leafletOutput("mapAct", width = "100%", height = "100%"),
+                                                 absolutePanel(top = 10, right = 10,
+                                                               sliderInput("animation","Time(30 minutes)", min = 0,
+                                                                           max = 47, value = 0, step = 1,
+                                                                           animate = animationOptions(interval = 500, loop = FALSE))),
+                                                 absolutePanel(top = 100, left = 0,plotOutput("line"),width = 360,height = 300))
+                                    ))
+                        )
+                    ))
+```
+
+
+```{r}
+server <- function(input, output) {
+    # animation
+    filteredData <- reactive({
+        as.vector(Animation_matrix[input$animation+1,])
+    })
+    filteredData1 <- reactive({
+        df.line_chart[1:(input$animation+1),]
+    })
+    output$mapAct<-renderLeaflet({
+        leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
+            addTiles('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png') %>%
+            setView(lng = -73.95, lat = 40.72, zoom = 11)%>%
+            addLegend(pal = pal,values = bins,position = "bottomright")
+    })
+    observe({
+        leafletProxy("mapAct") %>%
+            addPolygons(data = neighborhood_map, stroke = TRUE, weight = 1, color = "purple",fillOpacity = .4,fillColor = pal(filteredData()))
+        output$line <- renderPlot({
+            p = ggplot(filteredData1(),aes(x = Time,y = Amount, group = 1))
+            p + geom_line() + 
+                scale_x_continuous(limits = c(0,24), expand = c(0,0)) + 
+                scale_y_continuous(limits = c(0,1000), expand = c(0,0)) + 
+                xlab("Time(hour)") + theme_bw() +
+                theme_wsj()+ scale_colour_wsj("colors6")
+        },
+        width = 360, height = 300
+        )
+    })
+    
+    
+}
+```
+
+
+```{r}
+shinyApp(ui = ui, server = server)
+```
+
+
+
+

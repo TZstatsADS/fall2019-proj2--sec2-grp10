@@ -1,0 +1,70 @@
+---
+title: "ADS Proj2"
+author: "Tiantian Chu"
+date: "10/3/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load data and libraries
+```{r,warning=FALSE,message=FALSE}
+dt_shooting = read.csv("~/Desktop/Columbia/ADS/proj2/NYPD_Shooting_modified1.csv")
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+```
+
+```{r}
+plotimage = function(x){
+  clean_age_shoot = x[x$PERP_AGE_GROUP %in% c("<18","18-24","25-44","45-64","65+","UNKNOWN"),]
+  df_age_shoot = as.data.frame(prop.table(table(droplevels(clean_age_shoot$PERP_AGE_GROUP))))
+  df_age_shoot = cbind(df_age_shoot,a = rep("shooter",nrow(df_age_shoot)))
+  clean_age_vic = dt_shooting[dt_shooting$VIC_AGE_GROUP %in% c("<18","18-24","25-44","45-64","65+","UNKNOWN"),]
+  df_age_vic = as.data.frame(prop.table(table(droplevels(clean_age_vic$VIC_AGE_GROUP))))
+  df_age_vic = cbind(df_age_vic,a = rep("victim",nrow(df_age_vic)))
+  df_age = rbind(df_age_shoot,df_age_vic)
+  colnames(df_age) = c("AGE_GROUP","Proportion","Identity")
+  g1 = ggplot(df_age, aes(x="", y=Proportion, fill=AGE_GROUP)) +
+    geom_bar(stat="identity", width=1, color="white") +
+    scale_fill_brewer(palette = "Pastel1")+
+    coord_polar("y", start=0) +
+    theme_void()+
+    facet_wrap(~Identity)
+  
+  clean_sex_shoot = x[x$PERP_SEX %in% c("M","F","U"),]
+  df_sex_shoot = as.data.frame(prop.table(table(droplevels(clean_sex_shoot$PERP_SEX))))
+  df_sex_shoot = cbind(df_sex_shoot,a = rep("shooter",nrow(df_sex_shoot)))
+  clean_sex_vic = dt_shooting[dt_shooting$VIC_SEX %in% c("M","F","U"),]
+  df_sex_vic = as.data.frame(prop.table(table(droplevels(clean_sex_vic$VIC_SEX))))
+  df_sex_vic = cbind(df_sex_vic,a = rep("victim",nrow(df_sex_vic)))
+  df_sex = rbind(df_sex_shoot,df_sex_vic)
+  colnames(df_sex) = c("SEX","Proportion","Identity")
+  g2 = ggplot(df_sex, aes(x="", y=Proportion, fill=SEX)) +
+    geom_bar(stat="identity", width=1, color="white") +
+    scale_fill_brewer(palette = "Pastel1")+
+    coord_polar("y", start=0) +
+    theme_void()+
+    facet_wrap(~Identity)
+  
+  clean_race_shoot = x[x$PERP_RACE !="",]
+  df_race_shoot = as.data.frame(prop.table(table(droplevels(clean_race_shoot$PERP_RACE))))
+  df_race_shoot = cbind(df_race_shoot,a = rep("shooter",nrow(df_race_shoot)))
+  clean_race_vic = dt_shooting[dt_shooting$VIC_RACE != "",]
+  df_race_vic = as.data.frame(prop.table(table(droplevels(clean_race_vic$VIC_RACE))))
+  df_race_vic = cbind(df_race_vic,a = rep("victim",nrow(df_race_vic)))
+  df_race = rbind(df_race_shoot,df_race_vic)
+  colnames(df_race) = c("RACE","Proportion","Identity")
+  g3 = ggplot(df_race, aes(x="", y=Proportion, fill=RACE)) +
+    geom_bar(stat="identity", width=1, color="white") +
+    scale_fill_brewer(palette = "Pastel1")+
+    coord_polar("y", start=0) +
+    theme_void()+
+    facet_wrap(~Identity)
+  
+  plot_grid(g1,g2,g3,nrow = 3,ncol = 1,align = "v")
+}

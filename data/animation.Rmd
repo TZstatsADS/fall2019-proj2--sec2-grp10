@@ -3,6 +3,10 @@ title: "Untitled"
 author: "Kanyan Chen"
 date: "10/02/2019"
 output: html_document
+<<<<<<< HEAD
+=======
+runtime: shiny
+>>>>>>> 32a6396e8e86459c5e9ae084c4459638e30babdf
 ---
 
 ```{r setup, include=FALSE}
@@ -63,16 +67,26 @@ server <- function(input, output) {
     as.vector(Animation_matrix[input$animation+1,])
   })
   output$mapAct<-renderLeaflet({
+<<<<<<< HEAD
     leaflet() %>%
       addTiles() %>%
       fitBounds(-74.5, 40.3, -73.5, 41.3)
+=======
+    leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
+      addTiles('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png') %>%
+      setView(lng = -73.99, lat = 40.72, zoom = 10)
+>>>>>>> 32a6396e8e86459c5e9ae084c4459638e30babdf
   })
   observe({
     leafletProxy("mapAct") %>%
       #clearShapes() %>%
       #if run clearShapes(), there will be flash between two slides;
       #if not, however, the basemap will be gradually coverd by polygons.
+<<<<<<< HEAD
       addPolygons(data = zipcode_map, stroke = FALSE, smoothFactor = 0.3, fillOpacity = .4,fillColor = pal(filteredData()))
+=======
+      addPolygons(data = zipcode_map, stroke = F, smoothFactor = 0.3, fillOpacity = .4,fillColor = pal(filteredData()))
+>>>>>>> 32a6396e8e86459c5e9ae084c4459638e30babdf
   })
 }
 ```
