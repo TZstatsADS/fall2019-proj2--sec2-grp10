@@ -11,7 +11,7 @@ Term: Fall 2019
 
 + Shiny Link : https://grac4ie.shinyapps.io/NYCshooting/
 
-+ **Shooting Crime Map**: 
++ **Team Members**: 
      + Kanyan Chen
      + Weijia Bao
      + Chang Xu
