@@ -34,7 +34,7 @@ All team members contributed equally in all stages of this project.
 
 Kanyan Chen carried out data pre-processing, animation part for heatmap and time series graph. Kanyan also debugged for our whole coding part.
 
-Tiantian Chu ploted the six pie chars for differnt boroughs and dates.
+Tiantian Chu ploted the six pie chars for different boroughs and dates.
 
 Weijia Bao completed all the nine graphs (d3 interactive graph, plotly graphs and so on) for our report part.
 
