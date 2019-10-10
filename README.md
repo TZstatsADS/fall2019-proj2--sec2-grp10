@@ -12,11 +12,11 @@ Term: Fall 2019
 + Shiny Link : https://grac4ie.shinyapps.io/NYCshooting/
 
 + **Shooting Crime Map**: 
-	+ Kanyan Chen
-	+ Weijia Bao
-	+ Chang Xu
-	+ Tiantian Chu
-        + Qingyu Zhang (Presenter)      
+     + Kanyan Chen
+     + Weijia Bao
+     + Chang Xu
+     + Tiantian Chu
+     + Qingyu Zhang (Presenter)      
 
 + **Project summary**: 
 In America, which has one of the highest rates of gun homicide in the world, cities experience gun violence at very high rates.  And urban gun violence touches on issues central to American life : safety, equality, opportunity and community. Residents and leaders of America’s cities face few challenges more urgent than gun violence. It takes thousands of lives, depresses the quality of life of whole neighborhoods, drives people to move away, and reduces cities’ attractiveness for newcomers. It makes it harder for schools, businesses, and community institutions to thrive. Urban gun violence also reflects and worsens America’s existing racial and economic disparities. So gun violence is a very severe situation to America, especially to big cities, like New York City.
