@@ -6,6 +6,14 @@
 
 ![screenshot](doc/screenshot11.png)
 
+![screenshot](doc/screenshot22.png)
+
+![screenshot](doc/screenshot33.png)
+
+![screenshot](doc/screenshot44.png)
+
+![screenshot](doc/screenshot55.png)
+
 
 ## Shooting Crime Map
 Term: Fall 2019
